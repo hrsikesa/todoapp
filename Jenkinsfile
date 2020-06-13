@@ -3,29 +3,26 @@ pipeline {
 
    environment {
      // You must set the following environment variables
-     // ORGANIZATION_NAME
-     // YOUR_DOCKERHUB_USERNAME (it doesn't matter if you don't have one)
+     // YOUR_DOCKERHUB_USERNAME
+     // YOUR_DOCKERHUB_PASSWORD 
 
-     SERVICE_NAME = "fleetman-position-tracker"
-     REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
+     SERVICE_NAME = "todoapp"
+     REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${SERVICE_NAME}:${BUILD_ID}"
    }
 
    stages {
       stage('Preparation') {
          steps {
             cleanWs()
-            git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
+            git credentialsId: 'GitHub', url: "https://github.com/${SERVICE_NAME}"
          }
       }
-      stage('Build') {
-         steps {
-            sh '''mvn clean package'''
-         }
-      }
-
+      
       stage('Build and Push Image') {
          steps {
            sh 'docker image build -t ${REPOSITORY_TAG} .'
+           sh 'docker login -u $YOUR_DOCKERHUB_USERNAME -p $YOUR_DOCKERHUB_PASSWORD'
+           sh 'docker push ${REPOSITORY_TAG}'
          }
       }
 
