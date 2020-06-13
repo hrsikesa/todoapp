@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db
+  labels:
+    name: mongo
+    app: todoapp
+spec:
+      containers:
+      - image: mongo
+        name: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+        volumeMounts:
+          - name: mongo-storage
+            mountPath: /data/db
+      volumes:
+          - name: mongo-storage
+            hostPath:
+              path: /data/db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  labels:
+    name: mongo
+    app: todoapp
+spec:
+  selector:
+    name: mongo
+  type: ClusterIP
+  ports:
+    - name: db
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+  labels:
+    name: web
+    app: todoapp
+spec: 
+  containers: 
+    - image: ${REPOSITORY_TAG}
+      name: myweb
+      ports: 
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels:
+    name: web
+    app: todoapp
+spec:
+  selector:
+    name: web 
+  type: NodePort
+  ports:
+   - name: http
+     port: 3000
+     targetPort: 3000
+     protocol: TCP
